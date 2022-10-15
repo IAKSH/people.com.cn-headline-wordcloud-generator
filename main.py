@@ -17,14 +17,10 @@ def getHtml(url):
     return headLineHTMLStr
 
 def fixText(text):
-    text = text.replace("<p>","")
-    text = text.replace("</p>","")
-    text = text.replace("</p>","")
-    text = text.replace("<strong>","")
-    text = text.replace("</strong>","")
-    text = text.replace("<p style=\"text-indent: 2em;\">","")
-    text = text.replace("<p style=\"text-align: center;\">","")
-    text = text.replace("<script src=\"http://tv.people.com.cn/img/player/v.js\"></script><script>showPlayer({id:\"/pvservice/xml/2022/10/13/91067ddb-857a-4bcc-b6e4-c9323326c7d5.xml\",width:640,height:360,skin:2});</script>","")
+    needToRemove = re.findall("<(.*?)>",text)
+    banWords = ["td","p","span","&nbsp;","<",">","&nbs;","/"]
+    for i in needToRemove + banWords:
+        text = text.replace(i,"")
     return text
 
 def showWordCloud():
@@ -33,8 +29,8 @@ def showWordCloud():
         lines = file.readlines()
         for i in lines:
             allText += i
-        
-    cuts = jieba.lcut(allText)
+
+    cuts = jieba.lcut_for_search(allText)
     wordDic = {}
     for i in cuts:
         if i in wordDic.keys():
@@ -51,7 +47,7 @@ def showWordCloud():
             wordList.append(i)
             j += 1
     
-    wordCloudImage = wordcloud.WordCloud(  background_color='white',font_path = 'msyh.ttc', width=1000, height=860, margin=2).generate('/'.join(wordList))
+    wordCloudImage = wordcloud.WordCloud(  background_color='white',font_path = 'msyh.ttc', width=1920, height=1080, margin=1, stopwords={"的","和"}).generate('/'.join(wordList))
 
     plt.imshow(wordCloudImage)
     plt.axis('off')
@@ -65,7 +61,6 @@ while cycleCount != 3:
             singnal = 0
             for line in headlineLines:
                 line += '\n'
-                line = fixText(line)
                 if "<div class=\"box_pic\"></div>" in line:
                     singnal = 1
                     continue
@@ -73,8 +68,8 @@ while cycleCount != 3:
                     if "<div class=\"zdfy clearfix\"></div><center><table border=\"0\" align=\"center\" width=\"40%\"><tr></tr></table></center>" in line:
                         singnal = 0
                         break
-                    file.write(line)
-                    globalWordsFile.write(line)
+                    file.write(fixText(line))
+                    globalWordsFile.write(fixText(line))
     showWordCloud()
 
     print("see you net day.")
