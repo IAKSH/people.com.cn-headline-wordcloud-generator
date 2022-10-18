@@ -9,7 +9,7 @@ import os
 def getHtml(url):
     pool = urllib3.PoolManager()
     homepageRes = pool.request("GET",url)
-    headlineURLRegular  = re.findall("\"(.*?)\"",re.search("<h1 class=\"fbold\" id=\"rm_topline\"><a href=\"(.*?)\"",homepageRes.data.decode("gb2312")).group())
+    headlineURLRegular  = re.findall("\"(.*?)\"",re.search("<h1 class=\"fbold\" id=\"rm_topline\"><a href=\"(.*?)\"",homepageRes.data.decode("gbk")).group())
     print("解析到头条文章链接：" + headlineURLRegular[2])
     headlineResRegular = pool.request("GET",headlineURLRegular[2])
     headLineHTMLStr = headlineResRegular.data.decode("gbk")
@@ -30,7 +30,7 @@ def showWordCloud():
         for i in lines:
             allText += i
 
-    cuts = jieba.lcut_for_search(allText)
+    cuts = jieba.lcut(allText)
     wordDic = {}
     for i in cuts:
         if i in wordDic.keys():
@@ -47,7 +47,7 @@ def showWordCloud():
             wordList.append(i)
             j += 1
     
-    wordCloudImage = wordcloud.WordCloud(  background_color='white',font_path = 'msyh.ttc', width=1920, height=1080, margin=1, stopwords={"的","和"}).generate('/'.join(wordList))
+    wordCloudImage = wordcloud.WordCloud(  collocations=False,background_color='white',font_path = 'msyh.ttc', width=1920, height=1080, margin=2, stopwords={"的","和","在","是","吧","让","对","个","了","上","不"}).generate('/'.join(wordList))
 
     plt.imshow(wordCloudImage)
     plt.axis('off')
